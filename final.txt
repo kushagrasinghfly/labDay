@@ -1,0 +1,1040 @@
+//Disc Scheduling 
+
+#include <bits/stdc++.h>
+using namespace std;
+
+void FCFS(int req[], int n, int head) {
+    int movement = 0, curr = head;
+
+    cout << "\nFCFS Order:\n" << curr;
+    for (int i = 0; i < n; i++) {
+        movement += abs(req[i] - curr);
+        curr = req[i];
+        cout << " -> " << curr;
+    }
+    cout << "\nTotal Movement = " << movement << "\n";
+}
+
+void SSTF(int req[], int n, int head) {
+    int movement = 0, curr = head;
+    vector<bool> done(n, false);
+
+    cout << "\nSSTF Order:\n" << curr;
+
+    for (int i = 0; i < n; i++) {
+        int idx = -1, best = INT_MAX;
+        for (int j = 0; j < n; j++) {
+            if (!done[j] && abs(req[j] - curr) < best) {
+                best = abs(req[j] - curr);
+                idx = j;
+            }
+        }
+        movement += abs(req[idx] - curr);
+        curr = req[idx];
+        done[idx] = true;
+        cout << " -> " << curr;
+    }
+
+    cout << "\nTotal Movement = " << movement << "\n";
+}
+
+void SCAN(int req[], int n, int head, int disk) {
+    vector<int> left, right;
+    int movement = 0, curr = head;
+
+    for (int i = 0; i < n; i++) {
+        if (req[i] < head) left.push_back(req[i]);
+        else right.push_back(req[i]);
+    }
+
+    sort(left.begin(), left.end());
+    sort(right.begin(), right.end());
+
+    cout << "\nSCAN Order:\n" << curr;
+
+    // Move right first → end
+    for (int x : right) {
+        movement += abs(x - curr);
+        curr = x;
+        cout << " -> " << curr;
+    }
+
+    // Move to disk end
+    movement += abs((disk - 1) - curr);
+    curr = disk - 1;
+    cout << " -> " << curr;
+
+    // Then left in reverse
+    for (int i = left.size() - 1; i >= 0; i--) {
+        movement += abs(left[i] - curr);
+        curr = left[i];
+        cout << " -> " << curr;
+    }
+
+    cout << "\nTotal Movement = " << movement << "\n";
+}
+
+void CSCAN(int req[], int n, int head, int disk) {
+    vector<int> left, right;
+    int movement = 0, curr = head;
+
+    for (int i = 0; i < n; i++) {
+        if (req[i] < head) left.push_back(req[i]);
+        else right.push_back(req[i]);
+    }
+
+    sort(left.begin(), left.end());
+    sort(right.begin(), right.end());
+
+    cout << "\nC-SCAN Order:\n" << curr;
+
+    // Move right first
+    for (int x : right) {
+        movement += abs(x - curr);
+        curr = x;
+        cout << " -> " << curr;
+    }
+
+    // Go to end
+    movement += abs((disk - 1) - curr);
+    curr = disk - 1;
+    cout << " -> " << curr;
+
+    // Jump to 0
+    movement += abs(curr - 0);
+    curr = 0;
+    cout << " -> " << curr;
+
+    // Now left
+    for (int x : left) {
+        movement += abs(x - curr);
+        curr = x;
+        cout << " -> " << curr;
+    }
+
+    cout << "\nTotal Movement = " << movement << "\n";
+}
+
+void LOOK(int req[], int n, int head) {
+    vector<int> left, right;
+    int movement = 0, curr = head;
+
+    for (int i = 0; i < n; i++) {
+        if (req[i] < head) left.push_back(req[i]);
+        else right.push_back(req[i]);
+    }
+
+    sort(left.begin(), left.end());
+    sort(right.begin(), right.end());
+
+    cout << "\nLOOK Order:\n" << curr;
+
+    // Move right
+    for (int x : right) {
+        movement += abs(x - curr);
+        curr = x;
+        cout << " -> " << curr;
+    }
+
+    // Now reverse direction
+    for (int i = left.size() - 1; i >= 0; i--) {
+        movement += abs(left[i] - curr);
+        curr = left[i];
+        cout << " -> " << curr;
+    }
+
+    cout << "\nTotal Movement = " << movement << "\n";
+}
+
+void CLOOK(int req[], int n, int head) {
+    vector<int> left, right;
+    int movement = 0, curr = head;
+
+    for (int i = 0; i < n; i++) {
+        if (req[i] < head) left.push_back(req[i]);
+        else right.push_back(req[i]);
+    }
+
+    sort(left.begin(), left.end());
+    sort(right.begin(), right.end());
+
+    cout << "\nC-LOOK Order:\n" << curr;
+
+    // Move right
+    for (int x : right) {
+        movement += abs(x - curr);
+        curr = x;
+        cout << " -> " << curr;
+    }
+
+    // Jump to smallest (left[0])
+    if (!left.empty()) {
+        movement += abs(curr - left[0]);
+        curr = left[0];
+        cout << " -> " << curr;
+    }
+
+    // Move through left
+    for (int x : left) {
+        if (x == left[0]) continue;
+        movement += abs(x - curr);
+        curr = x;
+        cout << " -> " << curr;
+    }
+
+    cout << "\nTotal Movement = " << movement << "\n";
+}
+
+int main() {
+    int n, head, disk;
+    cout << "Enter number of requests: ";
+    cin >> n;
+
+    int req[n];
+    cout << "Enter requests:\n";
+    for (int i = 0; i < n; i++) cin >> req[i];
+
+    cout << "Enter initial head position: ";
+    cin >> head;
+
+    cout << "Enter disk size (max cylinders): ";
+    cin >> disk;
+
+    // Call all algorithms
+    FCFS(req, n, head);
+    SSTF(req, n, head);
+    SCAN(req, n, head, disk);
+    CSCAN(req, n, head, disk);
+    LOOK(req, n, head);
+    CLOOK(req, n, head);
+
+    return 0;
+}
+
+
+// Page Replacement
+
+//LRU
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+int main() {
+    int frames, n;
+    cout << "Enter number of frames: ";
+    cin >> frames;
+
+    cout << "Enter number of pages in reference string: ";
+    cin >> n;
+
+    vector<int> pages(n);
+    cout << "Enter reference string:\n";
+    for (int i = 0; i < n; i++)
+        cin >> pages[i];
+
+    vector<int> mem(frames, -1);   // memory frames
+    vector<int> lastUsed(frames, -1); // track last used time
+    int pageFaults = 0, pageHits = 0;
+
+    cout << "\nRef\t";
+    for (int i = 0; i < frames; i++) cout << "F" << i+1 << "\t";
+    cout << "Status\n";
+
+    for (int i = 0; i < n; i++) {
+        int page = pages[i];
+        bool hit = false;
+
+        // Check if page is already in memory
+        for (int j = 0; j < frames; j++) {
+            if (mem[j] == page) {
+                hit = true;
+                lastUsed[j] = i;   // update last used time
+                break;
+            }
+        }
+
+        if (hit) {
+            pageHits++;
+        } else {
+            pageFaults++;
+
+            int replaceIndex = -1;
+
+            // If empty frame available → use it
+            for (int j = 0; j < frames; j++) {
+                if (mem[j] == -1) {
+                    replaceIndex = j;
+                    break;
+                }
+            }
+
+            // Else choose LRU (least recently used)
+            if (replaceIndex == -1) {
+                int lruTime = INT_MAX;
+
+                for (int j = 0; j < frames; j++) {
+                    if (lastUsed[j] < lruTime) {
+                        lruTime = lastUsed[j];
+                        replaceIndex = j;
+                    }
+                }
+            }
+
+            // Replace selected frame
+            mem[replaceIndex] = page;
+            lastUsed[replaceIndex] = i;
+        }
+
+        // Print output row
+        cout << page << "\t";
+        for (int j = 0; j < frames; j++) {
+            if (mem[j] == -1) cout << "-\t";
+            else cout << mem[j] << "\t";
+        }
+        cout << (hit ? "Hit" : "Fault") << "\n";
+    }
+
+    cout << "\nTotal Page Faults: " << pageFaults;
+    cout << "\nTotal Page Hits: " << pageHits;
+    cout << "\nPage Fault Rate: " << (double)pageFaults / n << "\n";
+
+    return 0;
+}
+
+
+//FIFO 
+
+#include<iostream>
+#include<vector>
+using namespace std;
+
+int main() {
+    int frames, n;
+    cout << "Enter number of frames: ";
+    cin >> frames;
+
+    cout << "Enter number of pages in reference string: ";
+    cin >> n;
+
+    vector<int> pages(n);
+    cout << "Enter the reference string:\n";
+    for (int i = 0; i < n; i++) cin >> pages[i];
+
+    vector<int> mem(frames, -1);  // memory frames
+    int pointer = 0;              // FIFO pointer
+    int pageFaults = 0, pageHits = 0;
+
+    // OUTPUT HEADER
+    cout << "\nRef\t";
+    for (int i = 0; i < frames; i++) cout << "F" << i+1 << "\t";
+    cout << "Status\n";
+
+    for (int i = 0; i < n; i++) {
+        int page = pages[i];
+        bool hit = false;
+
+        // Check if page already exists in memory
+        for (int j = 0; j < frames; j++) {
+            if (mem[j] == page) {
+                hit = true;
+                break;
+            }
+        }
+
+        if (hit) {
+            pageHits++;
+        } else {
+            pageFaults++;
+
+            // If frame empty → fill it
+            if (mem[pointer] == -1) {
+                mem[pointer] = page;
+                pointer = (pointer + 1) % frames;
+            }
+            // Replace oldest page (FIFO)
+            else {
+                mem[pointer] = page;
+                pointer = (pointer + 1) % frames;
+            }
+        }
+
+        // Print one row
+        cout << page << "\t";
+        for (int j = 0; j < frames; j++) {
+            if (mem[j] == -1) cout << "-\t";
+            else cout << mem[j] << "\t";
+        }
+        cout << (hit ? "Hit" : "Fault") << "\n";
+    }
+
+    cout << "\nTotal Page Faults: " << pageFaults;
+    cout << "\nTotal Page Hits: " << pageHits;
+    cout << "\nPage Fault Rate: " << pageFaults << " / " << n 
+         << " = " << (double)pageFaults / n << "\n";
+
+    return 0;
+}
+
+
+//CPU Sheduling
+
+//Round Robin
+
+#include<iostream>
+#include<algorithm>
+#include<queue>
+#include<vector>
+
+using namespace std;
+
+struct process{
+    int pid, at, bt;
+    int start,rt;
+    int ct,tat,wt;
+    bool done, started;
+};
+
+int main(){
+    int n,tq;
+    cout<<"Enter Number of process and Time Quantum \n";
+    cin>>n>>tq;
+    process p[n];
+
+    for(int i=0; i<n; i++){
+        cout<<"Enter the ID, AT and BT for process P"<<i+1<<" : ";
+        cin>>p[i].pid>>p[i].at>>p[i].bt;
+        p[i].rt = p[i].bt;
+        p[i].started = false;
+        p[i].done = false;
+    }
+
+    queue<int> q;
+    vector<bool> visited(n,false);
+    int time=0,completed=0;
+
+    for(int i=0;i<n;i++){
+        if(p[i].at == 0){
+            q.push(i);
+            visited[i] = true;
+        }
+    }
+
+    while(completed != n){
+        if(q.empty()){
+            time++;
+            for(int i=0;i<n;i++){
+                if(!visited[i] && p[i].at <= time){
+                    q.push(i);
+                    visited[i] = true;
+                }
+            }
+            continue;
+        }
+
+        int idx = q.front();
+        q.pop();
+
+        if(! p[idx].started){
+            p[idx].started = true;
+            p[idx].start = max(p[idx].at, time);
+        }
+
+        int runTime = min(tq, p[idx].rt);
+        p[idx].rt -= runTime;
+        time += runTime;
+        
+        if(p[idx].rt == 0){
+            completed++;
+            p[idx].done = true;
+            p[idx].ct = time;
+            p[idx].tat = p[idx].ct - p[idx].at;
+            p[idx].wt = p[idx].tat - p[idx].bt;
+        }
+        else{
+            q.push(idx);
+        }
+
+    }
+
+    double avgWT=0,avgTAT=0;
+    for(int i=0;i<n;i++){
+        avgWT+=p[i].wt;
+        avgTAT+=p[i].tat;
+    }
+
+    cout<<"Avg WT and TAT are : "<<avgWT/n<<" and "<<avgTAT/n<<". "<<endl;
+    return 0;
+}
+
+
+//FCFS
+
+#include<iostream>
+
+using namespace std;
+
+struct process{
+    int pid, start, at, bt, ct, tat, wt;
+};
+
+int main(){
+    int n;
+    cout<<"Enter the number of processes : \n";
+    cin>>n;
+    process p[n];
+
+    for(int i=0; i<n; i++){
+        cout<<"Enter the PID, AT and BT for process P"<<i+1<<" :";
+        cin>>p[i].pid;
+        cin>>p[i].at;
+        cin>>p[i].bt;
+    }
+
+    for(int i=0; i<n-1; i++){
+        for(int j=i+1; j<n; j++){
+            if(p[i].at>p[j].at)
+                swap(p[i], p[j]);
+        }
+    }
+
+    p[0].start = p[0].at;
+    p[0].ct = p[0].start + p[0].bt;
+
+    for(int i=1; i<n; i++){
+        p[i].start = max(p[i].at, p[i-1].ct);
+        p[i].ct = p[i].start + p[i].bt;
+    }
+
+    for(int i=0; i<n; i++){
+        p[i].tat = p[i].ct - p[i].at;
+        p[i].wt = p[i].tat - p[i].bt;
+    }
+
+    cout << "\nPID\tAT\tBT\tST\tCT\tTAT\tWT\n";
+    for (int i = 0; i < n; i++) {
+        cout << p[i].pid << "\t" << p[i].at << "\t" << p[i].bt << "\t"
+             << p[i].start << "\t" << p[i].ct << "\t"
+             << p[i].tat << "\t" << p[i].wt << endl;
+    }
+    return 0;
+}
+
+
+//SJF
+
+#include<iostream>
+#include <climits>
+
+using namespace std;
+
+struct process{
+    int pid;
+    int at;
+    int ct;
+    int bt;
+    int tat,wt;
+    bool done;
+    int start;
+};
+
+int main(){
+    int n;
+    cout<<"Enter the number of process : \n";
+    cin>>n;
+
+    process p[n];
+
+    for(int i=0;i<n;i++){
+        cout<<"Enter pid, at and bt for process P"<<i+1<<" : ";
+        cin>>p[i].pid;
+        cin>>p[i].at;
+        cin>>p[i].bt;
+        p[i].done = false;
+    }
+
+    int time=0; int completed =0;
+
+    while(completed != n){
+        int idx = -1;
+        int minBT = INT_MAX;
+
+        //finding the worthy process with minimum bt
+        for(int i=0;i<n;i++){
+            if(!p[i].done && p[i].at<=time){ //condition to check if the process has arrived
+                if(p[i].bt < minBT) //to choose the minimum bt process
+                {
+                    minBT = p[i].bt;
+                    idx = i;
+                }
+            }
+        }
+        
+        //if CPU is idle and no process has arrived
+        if(idx == -1){
+            time++;
+            continue;
+        }
+
+        //process execution 
+        p[idx].start = time;
+        p[idx].ct = p[idx].start + p[idx].bt;
+        p[idx].tat = p[idx].ct - p[idx].at;
+        p[idx].wt = p[idx].tat - p[idx].bt;
+        p[idx].done = true;
+
+        completed++;
+        time = p[idx].ct;
+    }
+
+    cout << "\nPID\tAT\tBT\tST\tCT\tTAT\tWT\n";
+    for (int i = 0; i < n; i++) {
+        cout << p[i].pid << "\t" << p[i].at << "\t" << p[i].bt << "\t"
+             << p[i].start << "\t" << p[i].ct << "\t"
+             << p[i].tat << "\t" << p[i].wt << endl;
+    }
+    return 0;
+}
+
+//SRTF
+
+#include<iostream>
+#include <climits>
+
+using namespace std;
+
+struct process{
+    int pid,at,bt;
+    int start,rt,ct;
+    int tat,wt;
+    bool started, done;
+};
+
+int main(){
+    int n;
+    cout<<"Enter the number of processes : \n";
+    cin>>n;
+    process p[n];
+    for(int i=0; i<n; i++){
+        cout<<"Enter the pid, at and bt for process P"<<i+1<<" : ";
+        cin>>p[i].pid;
+        cin>>p[i].at;
+        cin>>p[i].bt;
+        p[i].rt = p[i].bt;
+        p[i].done = false;
+        p[i].started = false;
+    }
+
+    int completed = 0;
+    int time = 0;
+
+    while(completed != n){
+        int idx = -1;
+        int minRT = INT_MAX;
+        // finding the process with minimum rt 
+        for(int i=0;i<n;i++){
+            if(!p[i].done && p[i].at<=time && p[i].rt < minRT){
+                minRT = p[i].rt;
+                idx = i;
+            }
+        }
+
+        //if CPU is idle
+        if(idx == -1){
+            time++;
+            continue;
+        }
+
+        //if process has started for first time
+        if(!p[idx].started){
+            p[idx].start=time;
+            p[idx].started = true;
+        }
+
+        //run for 1 time unit;
+        p[idx].rt--;
+        time++;
+
+        //if process if executed
+        if(p[idx].rt == 0){
+            p[idx].done = true;
+            p[idx].ct = time;
+            p[idx].tat = p[idx].ct - p[idx].at;
+            p[idx].wt = p[idx].tat - p[idx].bt;
+            completed++;
+        }
+
+    }
+
+    cout << "\nPID\tAT\tBT\tST\tCT\tTAT\tWT\n";
+    for (int i = 0; i < n; i++) {
+        cout << p[i].pid << "\t" << p[i].at << "\t" << p[i].bt << "\t"
+             << p[i].start << "\t" << p[i].ct << "\t"
+             << p[i].tat << "\t" << p[i].wt << endl;
+    }
+
+    return 0;
+}
+
+//Bankers 
+
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    int n, m; // n = number of processes, m = number of resources
+    cout << "Enter number of processes and number of resources: ";
+    cin >> n >> m;
+
+    int alloc[n][m], maxNeed[n][m], need[n][m];
+    int avail[m];
+
+    cout << "Enter Allocation Matrix:\n";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            cin >> alloc[i][j];
+    }
+
+    cout << "Enter Maximum Need Matrix:\n";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            cin >> maxNeed[i][j];
+    }
+
+    cout << "Enter Available Resources:\n";
+    for (int j = 0; j < m; j++)
+        cin >> avail[j];
+
+    // Calculate Need = Max - Allocation
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++)
+            need[i][j] = maxNeed[i][j] - alloc[i][j];
+    }
+
+    vector<int> safeSeq;
+    vector<bool> done(n, false);
+    int completed = 0;
+
+    while (completed < n) {
+        bool found = false;
+
+        for (int i = 0; i < n; i++) {
+            if (!done[i]) {
+                bool canRun = true;
+
+                // Check if Need <= Available
+                for (int j = 0; j < m; j++) {
+                    if (need[i][j] > avail[j]) {
+                        canRun = false;
+                        break;
+                    }
+                }
+
+                // If process can run
+                if (canRun) {
+                    for (int j = 0; j < m; j++)
+                        avail[j] += alloc[i][j]; // release resources
+
+                    safeSeq.push_back(i);
+                    done[i] = true;
+                    completed++;
+                    found = true;
+                }
+            }
+        }
+
+        if (!found) {
+            cout << "\nSystem is in UNSAFE STATE (Deadlock possible)\n";
+            return 0;
+        }
+    }
+
+    cout << "\nSystem is in SAFE STATE, Safe Sequence: ";
+    for (int i = 0; i < n; i++)
+        cout << "P" << safeSeq[i] << " ";
+    cout << endl;
+
+    return 0;
+}
+
+
+//DMA
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int m, p;
+    cout << "Enter number of memory blocks and number of processes: ";
+    cin >> m >> p;
+
+    int memory[m], process[p], allocation[p];
+    cout << "Enter sizes of memory blocks:\n";
+    for (int i = 0; i < m; i++) cin >> memory[i];
+
+    cout << "Enter sizes of each process:\n";
+    for (int i = 0; i < p; i++) cin >> process[i];
+
+    cout << "Enter 1 -> First Fit\n2 -> Best Fit\n3 -> Worst Fit\n";
+    int fit;
+    cin >> fit;
+
+    // Initialize all processes as not allocated
+    for (int i = 0; i < p; i++) allocation[i] = -1;
+
+    // ================= ALLOCATION ===================
+    if (fit == 1) { // FIRST FIT
+        for (int i = 0; i < p; i++) {
+            for (int j = 0; j < m; j++) {
+                if (memory[j] >= process[i]) {
+                    allocation[i] = j;
+                    memory[j] -= process[i]; // reduce block size
+                    break;
+                }
+            }
+        }
+    }
+    else if (fit == 2) { // BEST FIT
+        for (int i = 0; i < p; i++) {
+            int bestIndex = -1, minWaste = INT_MAX;
+            for (int j = 0; j < m; j++) {
+                if (memory[j] >= process[i] && (memory[j] - process[i]) < minWaste) {
+                    bestIndex = j;
+                    minWaste = memory[j] - process[i];
+                }
+            }
+            if (bestIndex != -1) {
+                allocation[i] = bestIndex;
+                memory[bestIndex] -= process[i];
+            }
+        }
+    }
+    else if (fit == 3) { // WORST FIT
+        for (int i = 0; i < p; i++) {
+            int worstIndex = -1, maxWaste = INT_MIN;
+            for (int j = 0; j < m; j++) {
+                if (memory[j] >= process[i] && (memory[j] - process[i]) > maxWaste) {
+                    worstIndex = j;
+                    maxWaste = memory[j] - process[i];
+                }
+            }
+            if (worstIndex != -1) {
+                allocation[i] = worstIndex;
+                memory[worstIndex] -= process[i];
+            }
+        }
+    }
+    else {
+        cout << "Invalid choice!";
+        return 0;
+    }
+
+    // ================= COMPACTION ===================
+    int freeMemory = 0;
+    for (int i = 0; i < m; i++) freeMemory += memory[i];
+
+    cout << "Do you want compaction? (1 = yes, 0 = no): ";
+    int comp;
+    cin >> comp;
+
+    if (comp == 1) {
+        for (int i = 0; i < p; i++) {
+            if (allocation[i] == -1 && process[i] <= freeMemory) {
+                allocation[i] = m; // imaginary new block
+                freeMemory -= process[i];
+            }
+        }
+    }
+
+    // ================= OUTPUT ===================
+    cout << "\nAllocation Result:\n";
+    for (int i = 0; i < p; i++) {
+        if (allocation[i] == -1)
+            cout << "Process " << i << " -> Not allocated\n";
+        else
+            cout << "Process " << i << " -> Block " << allocation[i] << "\n";
+    }
+
+    cout << "\nRemaining block sizes:\n";
+    if (comp == 1) cout << "Free memory after compaction: " << freeMemory << endl;
+    else {
+        for (int i = 0; i < m; i++) cout << memory[i] << " ";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+#include<iostream>
+#include<queue>
+#include<string>
+#include<vector>
+using namespace std;
+
+struct Process {
+    int pid, at, bt, pr;
+    int rt;     // remaining time
+    int ct, tat, wt;
+    bool done;
+};
+
+int main() {
+    int n;
+    cout << "Enter number of processes: ";
+    cin >> n;
+
+    vector<Process> p(n);
+    for (int i = 0; i < n; i++) {
+        cout << "Enter PID AT BT Priority (1=High, 2=Low): ";
+        cin >> p[i].pid >> p[i].at >> p[i].bt >> p[i].pr;
+        p[i].rt = p[i].bt;
+        p[i].done = false;
+    }
+
+    const int TQ = 3;   // Round Robin quantum for Queue 1
+
+    queue<int> Q1;  // High priority → Round Robin
+    queue<int> Q2;  // Low priority → FCFS
+
+    int time = 0, completed = 0;
+    vector<bool> visited(n, false);
+    vector<int> gantt;
+
+    while (completed < n) {
+
+        // Push arrived processes into correct queue
+        for (int i = 0; i < n; i++) {
+            if (!visited[i] && p[i].at <= time) {
+                if (p[i].pr == 1) Q1.push(i);
+                else Q2.push(i);
+                visited[i] = true;
+            }
+        }
+
+        // If both empty → idle time advances
+        if (Q1.empty() && Q2.empty()) {
+            time++;
+            continue;
+        }
+
+
+        if (!Q1.empty()) {
+            int idx = Q1.front();
+            Q1.pop();
+
+            int run = min(TQ, p[idx].rt);
+            p[idx].rt -= run;
+            gantt.push_back(p[idx].pid);
+            time += run;
+
+            // Push newly arrived processes during execution
+            for (int i = 0; i < n; i++) {
+                if (!visited[i] && p[i].at <= time) {
+                    if (p[i].pr == 1) Q1.push(i);
+                    else Q2.push(i);
+                    visited[i] = true;
+                }
+            }
+
+            if (p[idx].rt == 0) {
+                p[idx].done = true;
+                p[idx].ct = time;
+                p[idx].tat = p[idx].ct - p[idx].at;
+                p[idx].wt = p[idx].tat - p[idx].bt;
+                completed++;
+            } else {
+                Q1.push(idx);  // not finished → back of queue
+            }
+
+            continue;
+        }
+
+
+        if (!Q2.empty()) {
+            int idx = Q2.front();
+            Q2.pop();
+
+            gantt.push_back(p[idx].pid);
+
+            time += p[idx].rt;
+            p[idx].rt = 0;
+
+            p[idx].done = true;
+            p[idx].ct = time;
+            p[idx].tat = p[idx].ct - p[idx].at;
+            p[idx].wt = p[idx].tat - p[idx].bt;
+            completed++;
+
+            continue;
+        }
+    }
+
+
+    cout << "\nGantt Chart:\n";
+    for (auto &x : gantt) cout << "P" << x << " ";
+    cout << "\n\n";
+
+    cout << "PID\tAT\tBT\tPR\tCT\tTAT\tWT\n";
+    double avgTAT = 0, avgWT = 0;
+
+    for (int i = 0; i < n; i++) {
+        cout << p[i].pid << "\t" << p[i].at << "\t" << p[i].bt << "\t"
+             << p[i].pr << "\t" << p[i].ct << "\t"
+             << p[i].tat << "\t" << p[i].wt << "\n";
+
+        avgTAT += p[i].tat;
+        avgWT  += p[i].wt;
+    }
+
+    cout << "\nAverage Waiting Time = " << avgWT / n;
+    cout << "\nAverage Turnaround Time = " << avgTAT / n << "\n";
+
+    return 0;
+}
+
+
+//optimal
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+    string input;
+    int frames;
+    cout<<"Reference string: "; getline(cin, input);
+    cout<<"Frame size: "; cin>>frames;
+    stringstream ss(input);
+    int page;
+    vector<int> pages;
+    while(ss>>page) pages.push_back(page);
+    int hits=0, faults=0;
+    vector<int> framelist;
+    for(int i=0;i<pages.size();i++)
+    {
+        auto it=find(framelist.begin(), framelist.end(), pages[i]);
+        if(it!=framelist.end()) hits++;
+        else{
+            faults++;
+            if(framelist.size()<frames) framelist.push_back(pages[i]);
+            else{
+                int idx=0, far=-1;
+                for(int j=0;j<frames;j++)
+                {
+                    int k=find(pages.begin()+i+1, pages.end(), framelist[j])-pages.begin();
+                    if(k==pages.size()){ idx=j; break;}
+                    if(k>far) {far=k; idx=j;}
+                }
+                framelist[idx]=pages[i];
+            }
+        }
+        cout<<"Page "<<pages[i]<<": ";
+        for(int a: framelist) cout<<a<<" ";
+        cout<<(it!=framelist.end() ? "(HIT)" : "(FAULT)")<<endl;
+    }
+    cout<<"\nFaults: "<<faults<<"Hits: "<<hits<<"Rate: "<<(double)faults/pages.size();
+    return 0;
+}
+
+
